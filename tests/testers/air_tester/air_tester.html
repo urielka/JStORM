@@ -1,0 +1,86 @@
+<html>
+	<head>
+        <title>Adobe AIR tester</title>
+        <script type="text/javascript" src="tests/testers/air_tester/AIRIntrospector.js"></script>
+        <script type="text/javascript" src="tests/testers/air_tester/AIRAliases.js"></script>
+		<script type="text/javascript" src="tests/testers/fixtures.js"></script>
+		<script type="text/javascript" src="tests/testers/unit_test.js"></script>
+		<script src="src/gears_init.js"></script>
+		<script src="src/JStORM.js"></script>
+		<script src="src/JStORM.Query.js"></script>
+		<script src="src/JStORM.Sql.js"></script>
+		<script src="src/JStORM.Field.js"></script>
+		<script src="src/JStORM.ModelMetaData.js"></script>
+		<script src="src/JStORM.Model.js"></script>
+		<script src="src/JStORM.Events.js"></script>
+		<script src="src/providers/JStORM.AIR.js"></script>
+		<script src="src/dialects/JStORM.SQLite.js"></script>
+        <script>
+			JStORM.connections = 
+			{
+				"default":
+				{
+					PROVIDER:"AIR",
+					DIALECT:"SQLite",
+					PATH:"test_simple"
+				}
+			};
+
+			var AIRTester = 
+			{
+				loadedTest:{},
+				init:function()
+				{
+					AIRTester.fixtures = document.getElementById("fixtures");
+					AIRTester.run = document.getElementById("run");
+					AIRTester.resultConatiner = document.getElementById("resultsConatiner");
+					AIRTester.setFixtures();
+					AIRTester.attachEvents();
+				},
+				setFixtures:function()
+				{
+					for(var i=0;i<Fixtures.length;i++)
+					{
+						var fixture = AIRTester.fixtures.options[i] = new Option();
+						fixture.value = fixture.innerHTML = Fixtures[i];
+					}
+				},
+				runFixture:function()
+				{
+					var fixture = AIRTester.fixtures[AIRTester.fixtures.selectedIndex].value;
+					var run = function ()
+					{
+						AIRTester.resultConatiner.innerHTML = "";
+						UnitTest.renderHtmlDOM(window[fixture](),AIRTester.resultConatiner);
+					};
+					
+					if (!AIRTester.loadedTest[fixture])
+					{
+						AIRTester.loadedTest[fixture] = true;
+						var script = document.createElement("script");
+						script.src = "tests/" + fixture + ".js";
+						document.getElementsByTagName("head")[0].appendChild(script);
+						script.onload = run; 
+					}	
+					else
+						run();			
+				},
+				attachEvents:function()
+				{
+					AIRTester.run.onclick = AIRTester.runFixture;
+				}
+			}
+			window.onload = AIRTester.init;
+		</script>
+	</head>
+
+    <body>
+        <div>
+			Fixture:  <select id="fixtures" name="fixture"></select>
+			<input type="submit" id="run" value="Run"/>
+		</div>
+		<div id="resultsConatiner">
+			
+		</div>
+    </body>
+</html>

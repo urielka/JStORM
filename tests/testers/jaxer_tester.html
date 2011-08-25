@@ -1,0 +1,90 @@
+<html>
+	<head>
+		<script runat="server" src="fixtures.js"></script>
+		<script runat="server" src="unit_test.js"></script>
+		<script runat="server" src="../../src/JStORM.js"></script>
+		<script runat="server" src="../../src/JStORM.Query.js"></script>
+		<script runat="server" src="../../src/JStORM.Sql.js"></script>
+		<script runat="server" src="../../src/JStORM.Field.js"></script>
+		<script runat="server" src="../../src/JStORM.ModelMetaData.js"></script>
+		<script runat="server" src="../../src/JStORM.Model.js"></script>
+		<script runat="server" src="../../src/JStORM.Events.js"></script>
+		<script runat="server" src="../../src/providers/JStORM.Gears.js"></script>
+		<script runat="server" src="../../src/providers/JStORM.Jaxer.js"></script>
+		<script runat="server" src="../../src/dialects/JStORM.SQLite.js"></script>
+		<script runat="server" src="../../src/dialects/JStORM.MySQL.js"></script>
+		<script runat="server">
+
+			var JaxerTester =
+			{
+				sqliteDefaultConnection:{
+					PROVIDER:"Jaxer",
+					DIALECT:"SQLite",
+					PATH:"test_jaxer"
+				},
+				mysqlDefaultConnection:{
+					PROVIDER:"Jaxer",
+					DIALECT:"MySQL",
+					HOST:"localhost",
+					NAME:"test_jaxer",
+					USER:"testjaxer",
+					PASS:"testjaxer"
+				},
+				init:function()
+				{
+					JaxerTester.currentFixture = Jaxer.request.parsedUrl.queryParts["fixture"];
+					JaxerTester.currentDatabase = Jaxer.request.parsedUrl.queryParts["database"];
+					JaxerTester.setFixtures();
+					JaxerTester.setCurrentDatabase();
+					
+					if(JaxerTester.currentFixture)
+					{
+					      Jaxer.load("../" + JaxerTester.currentFixture + ".js");
+					      UnitTest.renderHtmlDOM(window[JaxerTester.currentFixture](),
+						  					document.getElementById("resultsConatiner"));
+					}
+	
+				},
+				setCurrentDatabase:function()
+				{
+					var databases = document.getElementById("databases");
+					switch(JaxerTester.currentDatabase)
+					{
+						case "MySQL":
+							JStORM.connections = {"default":JaxerTester.mysqlDefaultConnection};
+							databases.selectedIndex = 1;
+							break;
+							
+						case "SQLite":
+							JStORM.connections = {"default":JaxerTester.sqliteDefaultConnection};
+							databases.selectedIndex = 0;
+							break;
+					}
+				},
+				setFixtures:function()
+				{
+					var fixtures = document.getElementById("fixtures");
+					for(var i=0;i<Fixtures.length;i++)
+					{
+						var fixture = fixtures.options[i] = new Option();
+						fixture.value = fixture.innerHTML = Fixtures[i];
+						if(JaxerTester.currentFixture == Fixtures[i])
+							fixtures.selectedIndex = i;
+					}
+				}
+			}
+		</script>
+	</head>
+	<body onserverload="JaxerTester.init()">
+		<form action="jaxer_tester.html" method="get">
+			Fixture:  <select id="fixtures" name="fixture"></select>
+			Database: 
+			<select id="databases" name="database">
+				<option value="SQLite">SQLite</option>
+				<option value="MySQL">MySQL</option>
+			</select>
+			<input type="submit" id="run" value="Run"/>
+		</form>
+		<div id="resultsConatiner"></div>
+	</body>
+</html>
